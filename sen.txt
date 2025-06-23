@@ -1,3 +1,2 @@
-PASSWORD
-AWS_SECRET_ACCESS_KEY
-PRIVATE_KEY
+zffzf
+api_token
