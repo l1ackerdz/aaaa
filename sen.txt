@@ -1,2 +1,3 @@
 zffzf
 api_token
+PRIVATE_KEY
